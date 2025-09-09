@@ -103,4 +103,41 @@ const loginUser = async (req, res)=>{
     }
 }
 
-module.exports = {registerUser, loginUser}
+const changePassword = async (req, res)=>{
+    const userId = req.userInfo.userId
+
+    //extract old and new passwords
+    const {oldPassword, newPassword} = req.body
+
+    //find the current user(tring to change the password)
+    const user = await User.findById(userId)
+    if(!user){
+        return res.status(400).json({
+            success: false,
+            message: "User not found"
+        })
+    }
+
+    //check if the old password is correct
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password)
+    if(!isPasswordMatch){
+        return res.status(400).json({
+            success: false,
+            message: "Previous password is incorrect"
+        })
+    }
+
+    //hash the new password 
+    const salt = await bcrypt.genSalt(10)
+    const newHashedPassword = await bcrypt.hash(newPassword, salt)
+
+    user.password = newHashedPassword
+    await user.save()
+
+    res.status(200).json({
+        success: true,
+        message: "Password changed successfully"
+    })
+}
+
+module.exports = {registerUser, loginUser, changePassword} 
