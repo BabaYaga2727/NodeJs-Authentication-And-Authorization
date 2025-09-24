@@ -10,4 +10,4 @@ router.get("/welcome", authMiddleware, adminMiddleware, (req, res)=>{
     })
 })
 
-module.exports = router
+module.exports = router  
